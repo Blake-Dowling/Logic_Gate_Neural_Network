@@ -8,6 +8,7 @@ from matplotlib.figure import Figure
 import draw_network
 import embed_plot
 import xor_neural
+import math
 
 ##############################Constants##############################
 WIDTH_IN_CELLS = 16
@@ -60,16 +61,18 @@ def linearizeInput(input):
 def displayState(neural, output):
     ##############################X Axis of Network's Graph##############################
     linearized = linearizeInput(neural.input)
-    ##############################Update Output Layer Display##############################
-    neural.network.updateLayerData(len(neural.network.layers) - 1, np.around(output, 2))
-    ##############################Draw Current Neural Network##############################
-    neural.network.drawNetwork()
+    ##############################Draw Current Neural Network every 1 second##############################
+    if((time.time()) % 1 < 0.01):
+        ##############################Update Output Layer Display##############################
+        neural.network.updateLayerData(len(neural.network.layers) - 1, np.around(output, 2))
+        neural.network.drawNetwork()
+        ##############################Draw Current Feed Function##############################
+        stateText = "Relu(" + str(linearized) + " + " + \
+            str(np.around(neural.params.biases, 2)) + ") * " + str(np.around(neural.params.weights, 2)) + " = " + str(np.around(output, 2))
+        canvas.itemconfig(stateLabel, text = stateText)
     ##############################Draw Current Output on Graph##############################
     guessPlot.addLine(linearized, output)
-    ##############################Draw Current Feed Function##############################
-    stateText = "Relu(" + str(linearized) + " + " + \
-        str(np.around(neural.params.biases, 2)) + ") * " + str(np.around(neural.params.weights, 2)) + " = " + str(np.around(output, 2))
-    canvas.itemconfig(stateLabel, text = stateText)
+    
     window.update()
 
 ##############################Object Containing Vectors for Weights and Biases##############################
@@ -117,7 +120,8 @@ class Neural:
         ##############################Apply Activation Function##############################
         reluApplied = relu2DVector(biasAdded)
         ##############################Update Hidden Layer Display##############################
-        self.network.updateLayerData(1, np.around(reluApplied, 2))
+        if((time.time()) % 1 < 0.01):
+            self.network.updateLayerData(1, np.around(reluApplied, 2))
         ##############################Dot Product Weights##############################
         output = np.dot(reluApplied,  self.params.weights)
         ##############################Output Result##############################
