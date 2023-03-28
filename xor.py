@@ -23,9 +23,7 @@ canvas = Canvas(window,
                 height = WIDTH_IN_CELLS * CELL_SIZE)
 canvas.pack()
 ##############################Initialize Network Layer Displays##############################
-inputLayer = draw_network.Layer(canvas, 2, [], "Input")
-hiddenLayer = draw_network.Layer(canvas, 4, [], "Hidden")
-outputLayer = draw_network.Layer(canvas, 6, [], "Output")
+
 bestText = "Best Guess: "
 bestGuessLabel = canvas.create_text(1*CELL_SIZE, 12*CELL_SIZE, text = bestText, anchor = "w")
 guessPlot = embed_plot.PlotObj(window, 8*CELL_SIZE, 6*CELL_SIZE, 2, [], [])
@@ -38,41 +36,10 @@ def relu2DVector(vv):
         np.copyto(v, np.array(list(map(relu, v)))) #Apply relu(num) to each element and
         #copy new vector to original 2D vector
     return vv
-##########################################################################################
-##############################Initialize Input and Expected Output Data##############################
-##########################################################################################
-#inputData = xor_neural.getInputVector() #Retrieve binary combination inputs generated in xor_neural.py
 
-#outputVector = np.array([0, 1, 1, 1]) #Expected result: Retrieve xor distribution, given actual weights
-
-#inputLayer.dataVector = inputData
-#inputLayer.displayData() #Expected result: Retrieve xor distribution, given actual weights
-
-
-##########################################################################################
-##############################Neural Deep Learning Algorithm##############################
-##########################################################################################
-
-
-    
-
-
-   
-        ##########################################################################################
-        ##############################Apply Loss Function (Least Mean Squared)##############################
-        ##########################################################################################
-
-
-
-
-##########################################################################################
-##############################Calculate Phi (MSE) Using One Altered Weight or Bias##############################
-##########################################################################################
-def lossFunction(output, expected):
+##############################Calculates (MSE), Used as phi for Neural Network##############################
+def meanSquaredError(output, expected):
     MSE = 0
-    ##########################################################################################
-    ##############################Calculate Phi (Mean Squared Error)##############################
-    ##########################################################################################
     ##############################Calculate Error##############################
     errorVector = np.subtract(output, expected)
     ##############################Calculate Squared Error##############################
@@ -80,66 +47,79 @@ def lossFunction(output, expected):
     ##############################Calculate Mean Squared Error##############################
     MSE = np.sum(errorVector) / 4
     return MSE
-
+def linearizeInput(input):
+    inputWidth = np.shape(input)[1]
+    ##############################Identity Function for Linearizing Input##############################
+    id2 = np.full((inputWidth, inputWidth), 1)
+    ##############################Linearized 'Sum' Vector##############################
+    ##############################E.g. [[0,0][0,1][1,0][1,1]].[[1,1][1,1]]->[[0,0][1,1][1,1][2,2]]##############################
+    return np.dot(input, id2)
+##############################Display Current State of Neural Network##############################
 def displayState(neural, output):
+    ##############################X Axis of Network's Graph##############################
+    linearized = linearizeInput(neural.input)
     ##############################Draw Current Neural Network##############################
-    hiddenLayer.displayData()
-    outputLayer.dataVector = np.around(output, 2)
-    outputLayer.displayData()
-    guessPlot.addLine(neural.sumVector, output)
-    bestText = "Relu(" + str(neural.sumVector) + " + " + \
-        str(neural.params.biases) + ") * " + str(neural.params.weights) + " = " + str(output)
+    for layer in neural.layers:
+        layer.displayData()
+    neural.layers[len(neural.layers) - 1].dataVector = np.around(output, 2)
+
+    guessPlot.addLine(linearized, output)
+    bestText = "Relu(" + str(linearized) + " + " + \
+        str(np.around(neural.params.biases, 2)) + ") * " + str(np.around(neural.params.weights, 2)) + " = " + str(np.around(output, 2))
     canvas.itemconfig(bestGuessLabel, text = bestText)
     window.update()
 
 
 
-##########################################################################################
-##############################Object Representing a (4,1)->(4, ) Neural Network##############################
-##########################################################################################
+##############################Object Containing Vectors for Weights and Biases##############################
 class Params:
+    ##############################Initialize Parameters##############################
     def __init__(self):
         self.weights = np.array([0.0, 0.0])
         self.biases = np.array([0.0, 0.0])
+    ##############################Return Both Parameter Vectors as##############################
+    ##############################One Vector##############################
     def paramVector(self):
         return np.concatenate([self.weights, self.biases])
+    ##############################Revert Parameter Vector Into Tuple##############################
+    ##############################Of Weight and Bias Vectors##############################
     def separateVector(self, paramVector):
         weights = np.copy(paramVector[0:len(self.weights)])
         biases = np.copy(paramVector[len(self.weights):len(paramVector)])
         return (weights, biases)
+    ##############################Update Weight and Bias Vectors##############################
     def updateParams(self, paramVector):
         self.weights, self.biases = self.separateVector(paramVector)
+    ##############################Print Param Object Weight and Bias Vectors##############################
     def printParams(self):
         print("weights: " + str(self.weights))
         print("biases: " + str(self.biases))
+##############################Object Representing an Entire Neural Network##############################
 class Neural:
-    def __init__(self, input):
-        self.input = input
-        self.expected = expected
-        self.bestGuess = np.full((4, ), 0)
-        ##############################2x2 Identity Function for Linearizing Input##############################
-        id2 = np.full((2, 2), 1)
-        ##############################Linearized 'Sum' Vector##############################
-        ##############################[[0,0][0,1][1,0][1,1]].[[1,1][1,1]]->[[0,0][1,1][1,1][2,2]]##############################
-        self.params = Params()
-        self.sumVector = np.dot(input, id2)
+    ##############################Constructor##############################
+    def __init__(self, input, expected, lossFunction, numLayers):
+        self.input = input #Input fed into neural network
+        self.expected = expected #Expected Output used for training
+        self.lossFunction = lossFunction #Loss function used to calculate phi
+        self.params = Params() #Vectors containing weights and biases
         ##############################Amount by Which Weights and Biases are Altered##############################
-        self.INC_AMOUNT = 0.05
+        self.INC_AMOUNT = 0.05 #Precision with which network learns
+        self.layers = [] #Layers of neural network for displaying
+        for i in range(numLayers):
+            self.layers.append(draw_network.Layer(canvas, 2*i, [], "Layer " + str(i)))
     
-
-    def getOutput(self, input):
-        ##########################################################################################
-        ##############################Apply Learned Function (Using Guess Parameters)##############################
-        ##########################################################################################
+    ##############################Produce Output Given Current Parameters##############################
+    def feed(self, input):
+        ##############################Linearize Input##############################
+        linearized = linearizeInput(input)
         ##############################Add Bias##############################
-        biasAdded = np.add(input, self.params.biases)
+        biasAdded = np.add(linearized, self.params.biases)
         ##############################Apply Activation Function##############################
         reluApplied = relu2DVector(biasAdded)
-        hiddenLayer.dataVector = reluApplied
+        self.layers[1].dataVector = reluApplied
         ##############################Dot Product Weights##############################
         output = np.dot(reluApplied,  self.params.weights)
-
-        ##############################Output Guess##############################
+        ##############################Output Result##############################
         return output
 
 
@@ -147,43 +127,62 @@ class Neural:
 
 
 
-
-    def optParams(self):
+    ##############################Adjust Parameter (Single Iteration) Using Loss Function##############################
+    def train(self, incrementAmount):
+        ##############################Convert Network's Weight and Bias Vectors##############################
+        ##############################Into Single Vector##############################
         paramVector = self.params.paramVector()
-
+        ##############################Create a Parameter Vector for Each##############################
+        ##############################Test Adjustment##############################
         testVectors = []
+        ##############################For Each Parameter, Create Test Parameter##############################
+        ##############################Set with Parameter Increased and Decreased##############################
+        ##############################By Passed Increment Amount##############################
         for i in range(len(paramVector)):
-            testVector = np.copy(paramVector)
-            testVector[i] = paramVector[i] + self.INC_AMOUNT
+            ##############################Increase Parameter at i##############################
+            testVector = np.copy(paramVector) #Vector of parameters to test with i increased
+            testVector[i] = paramVector[i] + incrementAmount
             testVectors.append(testVector)
-            testVector = np.copy(paramVector)
-            testVector[i] = paramVector[i] - self.INC_AMOUNT
+            ##############################Decrease Parameter at i##############################
+            testVector = np.copy(paramVector) #Vector of parameters to test with i decreased
+            testVector[i] = paramVector[i] - incrementAmount
             testVectors.append(testVector)
+        ##############################Vector to Store Loss Function Outputs##############################
+        ##############################For Parameter Sets Corresponding by Indices##############################
         lossVector = []
         ##############################Test Each Parameter Set##############################
+        ##############################(Calculate Loss Function Output)##############################
         for testVector in testVectors:
+            ##############################Adjust Neural Network Params to##############################
+            ##############################Test Params##############################
             self.params.updateParams(testVector)
-            output = self.getOutput(self.input)
-            #displayState(self, output)
-            loss = lossFunction(output, expected)
+            ##############################Feed Neural Network##############################
+            output = self.feed(self.input)
+            ##############################Update Neural Network State Display##############################
+            displayState(self, output)
+            ##############################Calculate Loss Function Output##############################
+            ##############################For Current Test State##############################
+            loss = self.lossFunction(output, self.expected)
+            ##############################Add Test Loss to Array##############################
             lossVector.append(loss)
-        ##############################Back Propagation (Adjust Parameter Resulting Optimal Loss)##############################
-        ##############################Determine Phi (Least MSE)##############################
-        self.params.updateParams(testVectors[np.argmin(lossVector)])
-        # self.bestGuess = self.testParams(self.sumVector, s)
-        print("New Params: ")
-        self.params.printParams()
-        print("New Phi: " + str(np.min(lossVector)))
-        return np.min(lossVector)
+        ##############################Back Propagation (Adjust Parameters##############################
+        ##############################to Test Parameters Resulting in Optimal Loss)##############################
+        optimalParameters = testVectors[np.argmin(lossVector)]
+        self.params.updateParams(optimalParameters)
+        ##############################Return Optimal Loss Value##############################
+        phi = np.min(lossVector)
+        return phi
             
-        
-        
+PHI_TARGET = 0.01
+##############################Initialize Input##############################
 inputData = np.array([[0,0],[0,1],[1,0],[1,1]])
+##############################Initialize Training Output##############################
 expected = np.array([0,1,1,0])
-neural = Neural(inputData)
-while neural.optParams() > 0.1:
+##############################Create Neural Network Object##############################
+neural = Neural(inputData, expected, meanSquaredError, 3)
+##############################Train Neural Network to Specified Phi Target##############################
+while neural.train(neural.INC_AMOUNT) > PHI_TARGET:
     pass
-#learn()
-##############################Animation Loop##############################
+##############################Keep window open after training algorithm completes##############################
 while True:
     window.update()
