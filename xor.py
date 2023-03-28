@@ -22,10 +22,13 @@ canvas = Canvas(window,
                 width = WIDTH_IN_CELLS * CELL_SIZE, 
                 height = WIDTH_IN_CELLS * CELL_SIZE)
 canvas.pack()
-##############################Initialize Network Layer Displays##############################
+##############################Initialize Graph and Function Displays##############################
+canvas.create_text((WIDTH_IN_CELLS/2)*CELL_SIZE, 0.5*CELL_SIZE, text = "Network")
+canvas.create_text((WIDTH_IN_CELLS/2)*CELL_SIZE, 6.5*CELL_SIZE, text = "Output")
+guessPlot = embed_plot.PlotObj(window, ((WIDTH_IN_CELLS/2) - 2.5)*CELL_SIZE, 7*CELL_SIZE, 2, [], [])
+canvas.create_text((WIDTH_IN_CELLS/2)*CELL_SIZE, 12.5*CELL_SIZE, text = "State")
+stateLabel = canvas.create_text(((WIDTH_IN_CELLS/2))*CELL_SIZE, 14*CELL_SIZE, text = "")
 
-stateLabel = canvas.create_text(1*CELL_SIZE, 12*CELL_SIZE, text = "", anchor = "w")
-guessPlot = embed_plot.PlotObj(window, 8*CELL_SIZE, 6*CELL_SIZE, 2, [], [])
 ##############################Relu function (num)##############################
 def relu(x):
     return max(0, x)
@@ -58,10 +61,9 @@ def displayState(neural, output):
     ##############################X Axis of Network's Graph##############################
     linearized = linearizeInput(neural.input)
     ##############################Update Output Layer Display##############################
-    neural.layers[len(neural.layers) - 1].dataVector = np.around(output, 2)
+    neural.network.updateLayerData(len(neural.network.layers) - 1, np.around(output, 2))
     ##############################Draw Current Neural Network##############################
-    for layer in neural.layers:
-        layer.displayData()
+    neural.network.drawNetwork()
     ##############################Draw Current Output on Graph##############################
     guessPlot.addLine(linearized, output)
     ##############################Draw Current Feed Function##############################
@@ -103,11 +105,9 @@ class Neural:
         self.params = Params() #Vectors containing weights and biases
         ##############################Amount by Which Weights and Biases are Altered##############################
         self.INC_AMOUNT = 0.05 #Precision with which network learns
-        self.layers = [] #Layers of neural network for displaying
-        for i in range(numLayers):
-            self.layers.append(draw_network.Layer(canvas, 2*i, [], "Layer " + str(i)))
+        self.network = draw_network.Network(canvas, numLayers)
         ##############################Update Input Layer Display##############################
-        self.layers[0].dataVector = np.around(input, 2)
+        self.network.updateLayerData(0, np.around(input, 2))
     ##############################Produce Output Given Current Parameters##############################
     def feed(self, input):
         ##############################Linearize Input##############################
@@ -117,7 +117,7 @@ class Neural:
         ##############################Apply Activation Function##############################
         reluApplied = relu2DVector(biasAdded)
         ##############################Update Hidden Layer Display##############################
-        self.layers[1].dataVector = np.around(reluApplied, 2)
+        self.network.updateLayerData(1, np.around(reluApplied, 2))
         ##############################Dot Product Weights##############################
         output = np.dot(reluApplied,  self.params.weights)
         ##############################Output Result##############################

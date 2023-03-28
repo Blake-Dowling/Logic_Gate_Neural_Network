@@ -47,5 +47,15 @@ class Layer:
             createdObjs.append(node.label)
         self.objs.extend(createdObjs)
         self.canvas.update()
+class Network:
+    def __init__(self, canvas, numLayers):
+        self.layers = [] #Layers of neural network for displaying
+        for i in range(numLayers):
+            self.layers.append(Layer(canvas, 4*i + 2, [], "Layer " + str(i)))
+    def updateLayerData(self, layer, newData):
+        self.layers[layer].dataVector = newData
+    def drawNetwork(self):
+        for layer in self.layers:
+            layer.displayData()
 
    
