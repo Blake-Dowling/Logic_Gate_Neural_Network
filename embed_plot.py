@@ -20,18 +20,18 @@ class PlotObj:
         self.plot.tick_params(color = "blue", labelcolor = "blue")
         #plot.xaxis.label.set_color("blue")
 
-        self.line = self.plot.plot(xData, yData, ".", color = "lime")
+        self.line = self.plot.plot(xData, yData, "-", color = "lime")
 
         self.plotCanvas = FigureCanvasTkAgg(self.fig, master = window)
         self.plotCanvas.draw()
         self.plotCanvas.get_tk_widget().place(x = xLocation, y = yLocation)
         #return (self.plot, self.plotCanvas)
+    
     def addLine(self, xData, yData):
         for line in self.lines:
             line.remove()
-            
-        #print(self.plotCanvas.get_tk_widget().find_all())
         self.lines = []
-        newLine = self.plot.plot(xData, yData, ".", color = "lime")
+        newLine = self.plot.plot(xData, yData, "-", color = "lime")
         self.plotCanvas.draw()
         self.lines.extend(newLine)
+

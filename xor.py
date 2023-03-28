@@ -27,7 +27,7 @@ inputLayer = draw_network.Layer(canvas, 2, [], "Input")
 hiddenLayer = draw_network.Layer(canvas, 4, [], "Hidden")
 outputLayer = draw_network.Layer(canvas, 6, [], "Output")
 bestText = "Best Guess: "
-bestGuessLabel = canvas.create_text(3*CELL_SIZE, 9*CELL_SIZE, text = bestText)
+bestGuessLabel = canvas.create_text(1*CELL_SIZE, 12*CELL_SIZE, text = bestText, anchor = "w")
 guessPlot = embed_plot.PlotObj(window, 8*CELL_SIZE, 6*CELL_SIZE, 2, [], [])
 ##############################Relu function (num)##############################
 def relu(x):
@@ -43,7 +43,8 @@ def relu2DVector(vv):
 ##########################################################################################
 inputData = xor_neural.getInputVector() #Retrieve binary combination inputs generated in xor_neural.py
 #draw_network.displayData(canvas, 2, inputData, "Input Data") #Draw actual neural network for xor
-outputVector = xor_neural.getOutputVector() #Expected result: Retrieve xor distribution, given actual weights
+#outputVector = xor_neural.getOutputVector() #Expected result: Retrieve xor distribution, given actual weights
+outputVector = np.array([0, 1, 1, 1]) #Expected result: Retrieve xor distribution, given actual weights
 #inputLayer = draw_network.Layer(canvas, 2, inputData, "Input") #Draw actual neural network for xor
 inputLayer.dataVector = inputData
 inputLayer.displayData() #Expected result: Retrieve xor distribution, given actual weights
@@ -74,50 +75,52 @@ def learn():
     ##############################Calculate Phi (MSE) Using One Altered Weight or Bias##############################
     ##########################################################################################
     def testParams(sumVector, weightGuess, biasGuess):
-        global bestGuess
+        global bestGuess, bestText
         MSE = 0
         ##########################################################################################
         ##############################Apply Learned Function (Using Guess Parameters)##############################
         ##########################################################################################
         ##############################Add Bias##############################
-        sumVector = np.add(sumVector, biasGuess)
+        biasAdded = np.add(sumVector, biasGuess)
         ##############################Apply Activation Function##############################
-        sumVector = relu2DVector(sumVector)
+        reluApplied = relu2DVector(biasAdded)
         
-        hiddenLayer.dataVector = sumVector
+        hiddenLayer.dataVector = reluApplied
         ##############################Dot Product Weights##############################
-        sumVector = np.dot(sumVector,  weightGuess)
+        weightFactored = np.dot(reluApplied,  weightGuess)
         ##############################Output Guess##############################
-        bestGuess = np.copy(sumVector)
+        bestGuess = np.copy(weightFactored)
         ##############################Draw Current Neural Network##############################
-        #hiddenLayer.displayData()
+        hiddenLayer.displayData()
         outputLayer.dataVector = np.around(bestGuess, 2)
-        #outputLayer.displayData()
+        outputLayer.displayData()
         ##########################################################################################
         ##############################Calculate Phi (Mean Squared Error)##############################
         ##########################################################################################
         ##############################Calculate Error##############################
-        sumVector = np.subtract(sumVector, outputVector)
+        errorVector = np.subtract(bestGuess, outputVector)
         ##############################Calculate Squared Error##############################
-        sumVector = np.square(sumVector)
+        errorVector = np.square(errorVector)
         ##############################Calculate Mean Squared Error##############################
-        MSE = np.sum(sumVector) / 4
+        MSE = np.sum(errorVector) / 4
         return MSE
     ##############################Least MSE Per Iteration##############################
     minLoss = 1 
     ##########################################################################################
     ##############################Back Propagation Loop##############################
     ##########################################################################################
-    while minLoss > 0.1:
+    while minLoss > 0.01:
+        global bestText
         ##############################Current Output With Least MSE (Most Desirable Phi)##############################
-        bestText = "Best Guess: " + str(bestGuess)
+        ##############################Update Display##############################
+        #bestText = "Best Guess: " + str(bestGuess)
+        #canvas.itemconfig(bestGuessLabel, text = bestText)
+        ##############################Update Function Display##############################
+        bestText = "Relu(" + str(sumVector) + " + " + \
+            str(biasGuess) + ") * " + str(weightGuess) + " = " + str(bestGuess)
         canvas.itemconfig(bestGuessLabel, text = bestText)
-        #guessPlot.addLine(sumVector, bestGuess)
-        #guessPlot.plotCanvas.get_tk_widget().itemconfig(guessPlot.line, )
-        ##############################Plot Best Output##############################
-        #currentPlot, plotCanvas = embed_plot.embedPlot(window, 8*CELL_SIZE, 6*CELL_SIZE, 2, sumVector, bestGuess)
+        guessPlot.addLine(sumVector, bestGuess)
         window.update()
-        #currentPlot.remove()
         ##############################Reset Best MSE Each Iteration##############################
         minLoss = 1
         ##########################################################################################
