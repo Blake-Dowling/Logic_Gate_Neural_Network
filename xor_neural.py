@@ -10,16 +10,7 @@ import embed_plot
 ##############################Constants##############################
 WIDTH_IN_CELLS = 16
 CELL_SIZE = 40
-##############################Initialize Window and Main Canvas##############################
-window = Tk()
-window.resizable(False, False)
-canvas = Canvas(window, 
-                bg = "black", 
-                highlightbackground = "blue",
-                highlightthickness = 1,
-                width = WIDTH_IN_CELLS * CELL_SIZE, 
-                height = WIDTH_IN_CELLS * CELL_SIZE)
-canvas.pack()
+
 ##########################################################################################
 ##############################Manual Algorithm##############################
 ##########################################################################################

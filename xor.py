@@ -26,6 +26,9 @@ canvas.pack()
 inputLayer = draw_network.Layer(canvas, 2, [], "Input")
 hiddenLayer = draw_network.Layer(canvas, 4, [], "Hidden")
 outputLayer = draw_network.Layer(canvas, 6, [], "Output")
+bestText = "Best Guess: "
+bestGuessLabel = canvas.create_text(3*CELL_SIZE, 9*CELL_SIZE, text = bestText)
+guessPlot = embed_plot.PlotObj(window, 8*CELL_SIZE, 6*CELL_SIZE, 2, [], [])
 ##############################Relu function (num)##############################
 def relu(x):
     return max(0, x)
@@ -36,7 +39,7 @@ def relu2DVector(vv):
         #copy new vector to original 2D vector
     return vv
 ##########################################################################################
-##############################Input and Output Data##############################
+##############################Initialize Input and Expected Output Data##############################
 ##########################################################################################
 inputData = xor_neural.getInputVector() #Retrieve binary combination inputs generated in xor_neural.py
 #draw_network.displayData(canvas, 2, inputData, "Input Data") #Draw actual neural network for xor
@@ -82,20 +85,14 @@ def learn():
         sumVector = relu2DVector(sumVector)
         
         hiddenLayer.dataVector = sumVector
-        #hiddenObj = draw_network.displayData(canvas, 4, sumVector, "Hidden Vector")
         ##############################Dot Product Weights##############################
         sumVector = np.dot(sumVector,  weightGuess)
         ##############################Output Guess##############################
         bestGuess = np.copy(sumVector)
         ##############################Draw Current Neural Network##############################
-        #outputObjs = draw_network.displayData(canvas, 6, np.around(bestGuess, 2), "Output Data")
-        #outputLayer = draw_network.Layer(canvas, 6, np.around(bestGuess, 2), "Output")
-
-        hiddenLayer.displayData()
+        #hiddenLayer.displayData()
         outputLayer.dataVector = np.around(bestGuess, 2)
-        outputLayer.displayData()
-        #draw_network.deleteObjs(canvas, hiddenObj)
-        #draw_network.deleteObjs(canvas, outputObjs)
+        #outputLayer.displayData()
         ##########################################################################################
         ##############################Calculate Phi (Mean Squared Error)##############################
         ##########################################################################################
@@ -111,15 +108,16 @@ def learn():
     ##########################################################################################
     ##############################Back Propagation Loop##############################
     ##########################################################################################
-    while minLoss > 0.2:
+    while minLoss > 0.1:
         ##############################Current Output With Least MSE (Most Desirable Phi)##############################
         bestText = "Best Guess: " + str(bestGuess)
-        bestGuessLabel = canvas.create_text(3*CELL_SIZE, 9*CELL_SIZE, text = bestText)
+        canvas.itemconfig(bestGuessLabel, text = bestText)
+        #guessPlot.addLine(sumVector, bestGuess)
+        #guessPlot.plotCanvas.get_tk_widget().itemconfig(guessPlot.line, )
         ##############################Plot Best Output##############################
-        currentPlot, plotCanvas = embed_plot.embedPlot(window, 8*CELL_SIZE, 6*CELL_SIZE, 2, sumVector, bestGuess)
+        #currentPlot, plotCanvas = embed_plot.embedPlot(window, 8*CELL_SIZE, 6*CELL_SIZE, 2, sumVector, bestGuess)
         window.update()
-        canvas.delete(bestGuessLabel)
-        currentPlot.remove()
+        #currentPlot.remove()
         ##############################Reset Best MSE Each Iteration##############################
         minLoss = 1
         ##########################################################################################
