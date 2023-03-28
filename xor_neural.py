@@ -38,15 +38,15 @@ def generateXor(weightVector, biasVector):
     hiddenVector1 = np.dot(inputData, weight2DVector) #X * W
     hiddenVector1 = np.add(hiddenVector1, biasVector) #(X * W) + c
     hiddenVector1 = relu2DVector(hiddenVector1) #relu((X * W) + c)
-    draw_network.displayData(canvas, 4, hiddenVector1, "Hidden Vector")
+    #draw_network.displayData(canvas, 4, hiddenVector1, "Hidden Vector")
     ##############################Output Data##############################
     outputVector = np.dot(hiddenVector1, weightVector)
-    draw_network.displayData(canvas, 6, outputVector, "Output Data")
+    #draw_network.displayData(canvas, 6, outputVector, "Output Data")
     return outputVector
 ##############################Input Data##############################
 inputData = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-if __name__ == "__main__":
-    draw_network.displayData(canvas, 2, inputData, "Input Data")
+
+    #draw_network.displayData(canvas, 2, inputData, "Input Data")
 ##############################W##############################
 weight2DVector = np.array([[1, 1], [1, 1]])
 ##############################w##############################

@@ -22,7 +22,10 @@ canvas = Canvas(window,
                 width = WIDTH_IN_CELLS * CELL_SIZE, 
                 height = WIDTH_IN_CELLS * CELL_SIZE)
 canvas.pack()
-
+##############################Initialize Network Layer Displays##############################
+inputLayer = draw_network.Layer(canvas, 2, [], "Input")
+hiddenLayer = draw_network.Layer(canvas, 4, [], "Hidden")
+outputLayer = draw_network.Layer(canvas, 6, [], "Output")
 ##############################Relu function (num)##############################
 def relu(x):
     return max(0, x)
@@ -36,8 +39,11 @@ def relu2DVector(vv):
 ##############################Input and Output Data##############################
 ##########################################################################################
 inputData = xor_neural.getInputVector() #Retrieve binary combination inputs generated in xor_neural.py
-draw_network.displayData(canvas, 2, inputData, "Input Data") #Draw actual neural network for xor
+#draw_network.displayData(canvas, 2, inputData, "Input Data") #Draw actual neural network for xor
 outputVector = xor_neural.getOutputVector() #Expected result: Retrieve xor distribution, given actual weights
+#inputLayer = draw_network.Layer(canvas, 2, inputData, "Input") #Draw actual neural network for xor
+inputLayer.dataVector = inputData
+inputLayer.displayData() #Expected result: Retrieve xor distribution, given actual weights
 ##########################################################################################
 ##############################Neural Deep Learning Algorithm##############################
 ##########################################################################################
@@ -74,9 +80,22 @@ def learn():
         sumVector = np.add(sumVector, biasGuess)
         ##############################Apply Activation Function##############################
         sumVector = relu2DVector(sumVector)
+        
+        hiddenLayer.dataVector = sumVector
+        #hiddenObj = draw_network.displayData(canvas, 4, sumVector, "Hidden Vector")
         ##############################Dot Product Weights##############################
         sumVector = np.dot(sumVector,  weightGuess)
+        ##############################Output Guess##############################
         bestGuess = np.copy(sumVector)
+        ##############################Draw Current Neural Network##############################
+        #outputObjs = draw_network.displayData(canvas, 6, np.around(bestGuess, 2), "Output Data")
+        #outputLayer = draw_network.Layer(canvas, 6, np.around(bestGuess, 2), "Output")
+
+        hiddenLayer.displayData()
+        outputLayer.dataVector = np.around(bestGuess, 2)
+        outputLayer.displayData()
+        #draw_network.deleteObjs(canvas, hiddenObj)
+        #draw_network.deleteObjs(canvas, outputObjs)
         ##########################################################################################
         ##############################Calculate Phi (Mean Squared Error)##############################
         ##########################################################################################
@@ -88,11 +107,11 @@ def learn():
         MSE = np.sum(sumVector) / 4
         return MSE
     ##############################Least MSE Per Iteration##############################
-    loss = 1 
+    minLoss = 1 
     ##########################################################################################
     ##############################Back Propagation Loop##############################
     ##########################################################################################
-    while loss > 0:
+    while minLoss > 0.2:
         ##############################Current Output With Least MSE (Most Desirable Phi)##############################
         bestText = "Best Guess: " + str(bestGuess)
         bestGuessLabel = canvas.create_text(3*CELL_SIZE, 9*CELL_SIZE, text = bestText)
