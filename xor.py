@@ -179,7 +179,7 @@ PHI_TARGET = 0.001
 ##############################Initialize Input##############################
 inputData = np.array([[0,0],[0,1],[1,0],[1,1]])
 ##############################Initialize Training Output##############################
-expected = np.array([0,1,1,0])
+expected = np.array([1,1,1,0])
 ##############################Create Neural Network Object##############################
 neural = Neural(inputData, expected, meanSquaredError, 4)
 ##############################Train Neural Network to Specified Phi Target##############################
