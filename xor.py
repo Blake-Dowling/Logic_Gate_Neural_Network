@@ -115,13 +115,15 @@ class Neural:
     def feed(self, input):
         ##############################Linearize Input##############################
         linearized = linearizeInput(input)
+        if((time.time()) % 1 < 0.01):
+            self.network.updateLayerData(1, np.around(linearized, 2))
         ##############################Add Bias##############################
         biasAdded = np.add(linearized, self.params.biases)
         ##############################Apply Activation Function##############################
         reluApplied = relu2DVector(biasAdded)
         ##############################Update Hidden Layer Display##############################
         if((time.time()) % 1 < 0.01):
-            self.network.updateLayerData(1, np.around(reluApplied, 2))
+            self.network.updateLayerData(2, np.around(reluApplied, 2))
         ##############################Dot Product Weights##############################
         output = np.dot(reluApplied,  self.params.weights)
         ##############################Output Result##############################
@@ -173,13 +175,13 @@ class Neural:
         phi = np.min(lossVector)
         return phi
             
-PHI_TARGET = 0.01
+PHI_TARGET = 0.001
 ##############################Initialize Input##############################
 inputData = np.array([[0,0],[0,1],[1,0],[1,1]])
 ##############################Initialize Training Output##############################
 expected = np.array([0,1,1,0])
 ##############################Create Neural Network Object##############################
-neural = Neural(inputData, expected, meanSquaredError, 3)
+neural = Neural(inputData, expected, meanSquaredError, 4)
 ##############################Train Neural Network to Specified Phi Target##############################
 while neural.train(neural.INC_AMOUNT) > PHI_TARGET:
     pass

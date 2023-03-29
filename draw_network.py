@@ -5,17 +5,24 @@ CELL_SIZE = 40
 class Node:
     def __init__(self, canvas, x, y, l):
         self.location = (x, y)
-        # color = np.array([(50.0, 205.0, 50.0)])
-        # brightness = np.array(l)
-        # brightness = np.sum(l)
-        # color = np.multiply(color, l)
-        # color = f'#{50:02x}{205:02x}{50:02x}'
+        color = "lime"
+        labelIsScalar = True
+        try: 
+            l = float(l)
+        except ValueError:
+            labelIsScalar = False
+        if labelIsScalar:
+            rgb = np.array([50, 205, 50])
+            print("tick")
+            color = np.multiply(rgb, max(0.0, min(1.0, l)))
+            color = list(map(lambda x : int(x), color))
+            color = f'#{color[0]:02x}{color[1]:02x}{color[2]:02x}'
         self.object = canvas.create_oval(x * CELL_SIZE, 
                                         y * CELL_SIZE, 
                                         (x + 1) * CELL_SIZE, 
                                         (y + 1) * CELL_SIZE, 
-                                        fill = "lime",
-                                        outline = "blue")
+                                        fill = color,
+                                        outline = "blue",)
         self.label = canvas.create_text((x + 0.5) * CELL_SIZE, 
                                         (y + 0.5) * CELL_SIZE, 
                                         text = str(l),

@@ -31,7 +31,7 @@ class PlotObj:
         for line in self.lines:
             line.remove()
         self.lines = []
-        newLine = self.plot.plot(xData, yData, "-", color = "lime")
+        newLine = self.plot.plot(xData, yData, "-", color = '#32CD32')
         self.plotCanvas.draw()
         self.lines.extend(newLine)
 
