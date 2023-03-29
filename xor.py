@@ -62,10 +62,12 @@ def displayState(neural, output):
     ##############################X Axis of Network's Graph##############################
     linearized = linearizeInput(neural.input)
     ##############################Draw Current Neural Network every 1 second##############################
-    if((time.time()) % 1 < 0.01):
+    if((time.time()) % 1 < 0.05):
         ##############################Update Output Layer Display##############################
-        neural.network.updateLayerData(len(neural.network.layers) - 1, np.around(output, 2))
-        neural.network.drawNetwork()
+        neural.layers[3] = np.around(output, 2)
+        network.updateNeural(neural) #May not even need to update
+        #neural.network.updateLayerData(len(neural.network.layers) - 1, np.around(output, 2))
+        #neural.network.drawNetwork()
         ##############################Draw Current Feed Function##############################
         stateText = "Relu(" + str(linearized) + " + " + \
             str(np.around(neural.params.biases, 2)) + ") * " + str(np.around(neural.params.weights, 2)) + " = " + str(np.around(output, 2))
@@ -108,22 +110,26 @@ class Neural:
         self.params = Params() #Vectors containing weights and biases
         ##############################Amount by Which Weights and Biases are Altered##############################
         self.INC_AMOUNT = 0.05 #Precision with which network learns
-        self.network = draw_network.Network(canvas, numLayers)
+        self.layers = [0 for i in range(numLayers)]
+        self.layers[0] = np.around(input, 2)
+        #self.network = draw_network.Network(canvas, numLayers)
         ##############################Update Input Layer Display##############################
-        self.network.updateLayerData(0, np.around(input, 2))
+        #self.network.updateLayerData(0, )
     ##############################Produce Output Given Current Parameters##############################
     def feed(self, input):
         ##############################Linearize Input##############################
         linearized = linearizeInput(input)
-        if((time.time()) % 1 < 0.01):
-            self.network.updateLayerData(1, np.around(linearized, 2))
+        if((time.time()) % 1 < 0.05):
+            self.layers[1] = np.around(linearized, 2)
+            #self.network.updateLayerData(1, np.around(linearized, 2))
         ##############################Add Bias##############################
         biasAdded = np.add(linearized, self.params.biases)
         ##############################Apply Activation Function##############################
         reluApplied = relu2DVector(biasAdded)
         ##############################Update Hidden Layer Display##############################
-        if((time.time()) % 1 < 0.01):
-            self.network.updateLayerData(2, np.around(reluApplied, 2))
+        if((time.time()) % 1 < 0.05):
+            self.layers[2] = np.around(reluApplied, 2)
+            #self.network.updateLayerData(2, np.around(reluApplied, 2))
         ##############################Dot Product Weights##############################
         output = np.dot(reluApplied,  self.params.weights)
         ##############################Output Result##############################
@@ -179,9 +185,10 @@ PHI_TARGET = 0.001
 ##############################Initialize Input##############################
 inputData = np.array([[0,0],[0,1],[1,0],[1,1]])
 ##############################Initialize Training Output##############################
-expected = np.array([1,1,1,0])
+expected = np.array([0,1,1,0])
 ##############################Create Neural Network Object##############################
 neural = Neural(inputData, expected, meanSquaredError, 4)
+network = draw_network.Network(canvas, neural, 4)
 ##############################Train Neural Network to Specified Phi Target##############################
 while neural.train(neural.INC_AMOUNT) > PHI_TARGET:
     pass
