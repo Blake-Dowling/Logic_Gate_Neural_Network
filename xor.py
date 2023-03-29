@@ -40,10 +40,11 @@ canvas = Canvas(window,
 canvas.pack()
 ##############################Initialize Graph and Function Displays##############################
 canvas.create_text((WIDTH_IN_CELLS/2)*CELL_SIZE, 0.5*CELL_SIZE, text = "Network")
-canvas.create_text((WIDTH_IN_CELLS/1.1)*CELL_SIZE, 6.5*CELL_SIZE, text = "Output")
-guessPlot = embed_plot.PlotObj(window, ((WIDTH_IN_CELLS/1.1) - 2.5)*CELL_SIZE, 7*CELL_SIZE, 2, [], [])
-canvas.create_text((WIDTH_IN_CELLS/2)*CELL_SIZE, 12.5*CELL_SIZE, text = "State")
-stateLabel = canvas.create_text(((WIDTH_IN_CELLS/2))*CELL_SIZE, 14*CELL_SIZE, text = "")
+canvas.create_text(((WIDTH_IN_CELLS/2)+5)*CELL_SIZE, 10.25*CELL_SIZE, text = "Output")
+guessPlot = embed_plot.PlotObj(window, ((WIDTH_IN_CELLS/2)+2.5)*CELL_SIZE, 10.5*CELL_SIZE, 2, [], [])
+canvas.create_text(((WIDTH_IN_CELLS/2)-3)*CELL_SIZE, 12.5*CELL_SIZE, text = "State")
+stateLabel = canvas.create_text((0.5)*CELL_SIZE, 14*CELL_SIZE, text = "", anchor = "w")
+##############################Dropdown Menu##############################
 INPUT_OPTIONS = ["NOT", "AND", "OR", "NAND", "XOR", "NOR", "XNOR"]
 currentGate = StringVar(window)
 currentGate.set("AND")
@@ -68,10 +69,15 @@ def meanSquaredError(output, expected):
     ##############################Calculate Squared Error##############################
     errorVector = np.square(errorVector)
     ##############################Calculate Mean Squared Error##############################
-    MSE = np.sum(errorVector) / 4
+    MSE = np.sum(errorVector) / len(output)
     return MSE
 def linearizeInput(input):
-    inputWidth = np.shape(input)[1]
+    try:
+        inputWidth = np.shape(input)[1]
+    except IndexError:
+            return input
+    except  TypeError:
+            return input
     ##############################Identity Function for Linearizing Input##############################
     id2 = np.full((inputWidth, inputWidth), 1)
     ##############################Linearized 'Sum' Vector##############################
@@ -86,8 +92,6 @@ def displayState(neural, output):
         ##############################Update Output Layer Display##############################
         neural.layers[3] = np.around(output, 2)
         network.updateNeural(neural) #May not even need to update
-        #neural.network.updateLayerData(len(neural.network.layers) - 1, np.around(output, 2))
-        #neural.network.drawNetwork()
         ##############################Draw Current Feed Function##############################
         stateText = "Relu(" + str(linearized) + " + " + \
             str(np.around(neural.params.biases, 2)) + ") * " + str(np.around(neural.params.weights, 2)) + " = " + str(np.around(output, 2))
@@ -132,16 +136,12 @@ class Neural:
         self.INC_AMOUNT = 0.05 #Precision with which network learns
         self.layers = [0 for i in range(numLayers)]
         self.layers[0] = np.around(input, 2)
-        #self.network = draw_network.Network(canvas, numLayers)
-        ##############################Update Input Layer Display##############################
-        #self.network.updateLayerData(0, )
     ##############################Produce Output Given Current Parameters##############################
     def feed(self, input):
         ##############################Linearize Input##############################
         linearized = linearizeInput(input)
         if((time.time()) % 1 < 0.05):
             self.layers[1] = np.around(linearized, 2)
-            #self.network.updateLayerData(1, np.around(linearized, 2))
         ##############################Add Bias##############################
         biasAdded = np.add(linearized, self.params.biases)
         ##############################Apply Activation Function##############################
@@ -149,7 +149,6 @@ class Neural:
         ##############################Update Hidden Layer Display##############################
         if((time.time()) % 1 < 0.05):
             self.layers[2] = np.around(reluApplied, 2)
-            #self.network.updateLayerData(2, np.around(reluApplied, 2))
         ##############################Dot Product Weights##############################
         output = np.dot(reluApplied,  self.params.weights)
         ##############################Output Result##############################

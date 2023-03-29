@@ -16,12 +16,14 @@ def setBrightness(brightness, rgb, lineOrNode):
         if brightness < 0:
             rgb = [255, 0, 0]
             brightness = abs(brightness)
+        rgb = np.array(rgb)
         if lineOrNode == "line":
             if brightness != 0:
                 brightness = brightness / 2
                 #brightness = math.log(brightness, 2)
-        rgb = np.array(rgb)
-        rgb = np.multiply(rgb, max(0.0, min(1.0, brightness)))
+                rgb = np.multiply(rgb, max(0.1, min(1.0, brightness)))
+        else: 
+            rgb = np.multiply(rgb, max(0.0, min(1.0, brightness)))
         rgb = list(map(lambda x : int(x), rgb))
     rgb = f'#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}'
     return rgb
