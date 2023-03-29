@@ -46,11 +46,32 @@ class Layer:
                                         fill = "deeppink")
         createdObjs.append(titleObj)
         ##############################Draw Nodes##############################
-        for i in range(0, len(self.dataVector)):
-            node = Node(self.canvas, self.xLocation, 2 + i, str(self.dataVector[i]))
-            self.nodes.append(node)
-            createdObjs.append(node.object)
-            createdObjs.append(node.label)
+        dataNotArray = True
+        ##############################Test if data array of numbers##############################
+        try:
+            dataNum = int(self.dataVector[0])
+        except ValueError:
+            dataNotArray = False
+        except  TypeError:
+            dataNotArray = False
+        for i in range(len(self.dataVector)):
+            ##############################If data is array of numbers,##############################
+            ##############################simply create node for each number##############################
+            if dataNotArray:
+                node = Node(self.canvas, self.xLocation, 2 + i, str(self.dataVector[i]))
+                self.nodes.append(node)
+                createdObjs.append(node.object)
+                createdObjs.append(node.label)
+            ##############################If data is array of arrays,##############################
+            ##############################Iterate through each array##############################
+            else:
+                for j in range(len(self.dataVector[i])):
+                    node = Node(self.canvas, self.xLocation, 
+                                2 + (i * len(self.dataVector[i])) + j, 
+                                str(self.dataVector[i][j]))
+                    self.nodes.append(node)
+                    createdObjs.append(node.object)
+                    createdObjs.append(node.label)
         return createdObjs
 class Network:
     def __init__(self, canvas, neural, numLayers):
@@ -77,22 +98,34 @@ class Network:
             newLayer = Layer(self.canvas, 4*i + 2, self.neural.layers[i], "Layer " + str(i))
             self.layers.append(newLayer)
             self.objs.extend(newLayer.drawLayer())
+        print(self.neural.params.biases)
         
-        # for obj in self.objs:
-        #     self.canvas.delete(obj)
-        # self.objs = []
+        for i in range(len(self.layers[2].nodes)):
+            node = self.layers[2].nodes[i]
+            otherNode = self.layers[3].nodes[int(i/2)]
+            color1 = setBrightness(self.neural.params.weights[int(i%2)], [255, 255, 255])
+            
+            newLine = self.canvas.create_line(node.location[0]*CELL_SIZE,
+                                                node.location[1]*CELL_SIZE,
+                                                otherNode.location[0]*CELL_SIZE,
+                                                otherNode.location[1]*CELL_SIZE,
+                                                fill = color1,
+                                                width = 1)
+            self.objs.append(newLine)
+
+
+
         # for i in range(len(self.layers)):
-        #     self.layers[i].drawLayer()
         #     if i + 1 < len(self.layers):
         #         for node in self.layers[i].nodes:
         #             for otherNode in self.layers[i+1].nodes:
-        #                 newConnection = self.canvas.create_line(node.location[0]*CELL_SIZE,
+        #                 newLine = self.canvas.create_line(node.location[0]*CELL_SIZE,
         #                                         node.location[1]*CELL_SIZE,
         #                                         otherNode.location[0]*CELL_SIZE,
         #                                         otherNode.location[1]*CELL_SIZE,
         #                                         fill = "white",
         #                                         width = 1)
-        #                 self.createdObjs.append(newConnection)
+        #                 self.objs.append(newLine)
 
         
 
