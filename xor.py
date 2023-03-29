@@ -25,8 +25,8 @@ canvas = Canvas(window,
 canvas.pack()
 ##############################Initialize Graph and Function Displays##############################
 canvas.create_text((WIDTH_IN_CELLS/2)*CELL_SIZE, 0.5*CELL_SIZE, text = "Network")
-canvas.create_text((WIDTH_IN_CELLS/2)*CELL_SIZE, 6.5*CELL_SIZE, text = "Output")
-guessPlot = embed_plot.PlotObj(window, ((WIDTH_IN_CELLS/2) - 2.5)*CELL_SIZE, 7*CELL_SIZE, 2, [], [])
+canvas.create_text((WIDTH_IN_CELLS/1.1)*CELL_SIZE, 6.5*CELL_SIZE, text = "Output")
+guessPlot = embed_plot.PlotObj(window, ((WIDTH_IN_CELLS/1.1) - 2.5)*CELL_SIZE, 7*CELL_SIZE, 2, [], [])
 canvas.create_text((WIDTH_IN_CELLS/2)*CELL_SIZE, 12.5*CELL_SIZE, text = "State")
 stateLabel = canvas.create_text(((WIDTH_IN_CELLS/2))*CELL_SIZE, 14*CELL_SIZE, text = "")
 

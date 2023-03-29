@@ -1,14 +1,25 @@
 from tkinter import *
 import numpy as np
+import math
 #from xor import neural
 CELL_SIZE = 40
-def setBrightness(brightness, rgb):
+##############################Relu function (num)##############################
+def relu(x):
+    return max(0, x)
+def setBrightness(brightness, rgb, lineOrNode):
     labelIsScalar = True
     try: 
         brightness = float(brightness)
     except ValueError:
         labelIsScalar = False
     if labelIsScalar:
+        if brightness < 0:
+            rgb = [255, 0, 0]
+            brightness = abs(brightness)
+        if lineOrNode == "line":
+            if brightness != 0:
+                brightness = brightness / 2
+                #brightness = math.log(brightness, 2)
         rgb = np.array(rgb)
         rgb = np.multiply(rgb, max(0.0, min(1.0, brightness)))
         rgb = list(map(lambda x : int(x), rgb))
@@ -18,7 +29,7 @@ class Node:
     def __init__(self, canvas, x, y, l):
         self.location = (x, y)
         color = "lime"
-        color = setBrightness(l, [50, 205, 50])
+        color = setBrightness(l, [50, 205, 50], "node")
         self.object = canvas.create_oval(x * CELL_SIZE, 
                                         y * CELL_SIZE, 
                                         (x + 1) * CELL_SIZE, 
@@ -94,22 +105,55 @@ class Network:
             self.canvas.delete(obj)
         self.objs = []
     def drawNetwork(self):
+        #############################Draw all nodes##############################
         for i in range(len(self.neural.layers)):
             newLayer = Layer(self.canvas, 4*i + 2, self.neural.layers[i], "Layer " + str(i))
             self.layers.append(newLayer)
             self.objs.extend(newLayer.drawLayer())
-        print(self.neural.params.biases)
-        
+        #############################Draw Bias Neural Connections##############################
+        for i in range(len(self.layers[0].nodes)):
+            node = self.layers[0].nodes[i]
+            otherNode = self.layers[1].nodes[i]
+            color = setBrightness(self.neural.params.biases[int(i%2)], [255, 255, 255], "line")
+            newLine = self.canvas.create_line((node.location[0]+1)*CELL_SIZE,
+                                                (node.location[1]+0.5)*CELL_SIZE,
+                                                (otherNode.location[0])*CELL_SIZE,
+                                                (otherNode.location[1]+0.5)*CELL_SIZE,
+                                                fill = color,
+                                                width = 1)
+            self.objs.append(newLine)
+        #############################Draw Activation Neural Connections##############################
+        for i in range(len(self.layers[1].nodes)):
+            node = self.layers[1].nodes[i]
+            otherNode = self.layers[2].nodes[i]
+            isNum = True
+            try:
+                int(node.label)
+            except ValueError:
+                isNum = False
+            except  TypeError:
+                isNum = False
+            if isNum:
+                color = setBrightness(relu(node.label), [255, 255, 255], "line")
+            else:
+                color = setBrightness(0, [255, 255, 255], "line")
+            newLine = self.canvas.create_line((node.location[0]+1)*CELL_SIZE,
+                                                (node.location[1]+0.5)*CELL_SIZE,
+                                                (otherNode.location[0])*CELL_SIZE,
+                                                (otherNode.location[1]+0.5)*CELL_SIZE,
+                                                fill = color,
+                                                width = 1)
+            self.objs.append(newLine)
+        ##############################Draw weight neural connections##############################
         for i in range(len(self.layers[2].nodes)):
             node = self.layers[2].nodes[i]
             otherNode = self.layers[3].nodes[int(i/2)]
-            color1 = setBrightness(self.neural.params.weights[int(i%2)], [255, 255, 255])
-            
-            newLine = self.canvas.create_line(node.location[0]*CELL_SIZE,
-                                                node.location[1]*CELL_SIZE,
-                                                otherNode.location[0]*CELL_SIZE,
-                                                otherNode.location[1]*CELL_SIZE,
-                                                fill = color1,
+            color = setBrightness(self.neural.params.weights[int(i%2)], [255, 255, 255], "line")
+            newLine = self.canvas.create_line((node.location[0]+1)*CELL_SIZE,
+                                                (node.location[1]+0.5)*CELL_SIZE,
+                                                (otherNode.location[0])*CELL_SIZE,
+                                                (otherNode.location[1]+0.5)*CELL_SIZE,
+                                                fill = color,
                                                 width = 1)
             self.objs.append(newLine)
 
