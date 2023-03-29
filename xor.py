@@ -10,9 +10,22 @@ import embed_plot
 import xor_neural
 import math
 
+
 ##############################Constants##############################
 WIDTH_IN_CELLS = 16
 CELL_SIZE = 40
+class Gate:
+    def __init__(self, name, input, output):
+        self.name = name
+        self.input = input
+        self.output = output
+GATES = {"NOT": Gate("NOT", [0,1], [1,0]),
+         "AND": Gate("AND", [[0,0],[0,1],[1,0],[1,1]], [0,0,0,1]),
+         "OR": Gate("OR", [[0,0],[0,1],[1,0],[1,1]], [0,1,1,1]),
+         "NAND": Gate("NAND", [[0,0],[0,1],[1,0],[1,1]], [1,1,1,0]),
+         "XOR": Gate("XOR", [[0,0],[0,1],[1,0],[1,1]], [0,1,1,0]),
+         "NOR": Gate("NOR", [[0,0],[0,1],[1,0],[1,1]], [1,0,0,0]),
+         "XNOR": Gate("XNOR", [[0,0],[0,1],[1,0],[1,1]], [1,0,0,1])}
 ##############################Initialize Window and Main Canvas##############################
 window = Tk()
 window.resizable(False, False)
@@ -29,7 +42,12 @@ canvas.create_text((WIDTH_IN_CELLS/1.1)*CELL_SIZE, 6.5*CELL_SIZE, text = "Output
 guessPlot = embed_plot.PlotObj(window, ((WIDTH_IN_CELLS/1.1) - 2.5)*CELL_SIZE, 7*CELL_SIZE, 2, [], [])
 canvas.create_text((WIDTH_IN_CELLS/2)*CELL_SIZE, 12.5*CELL_SIZE, text = "State")
 stateLabel = canvas.create_text(((WIDTH_IN_CELLS/2))*CELL_SIZE, 14*CELL_SIZE, text = "")
+INPUT_OPTIONS = ["NOT", "AND", "OR", "NAND", "XOR", "NOR", "XNOR"]
+currentGate = StringVar(window)
+currentGate.set("AND")
 
+menu = OptionMenu(window, currentGate, *INPUT_OPTIONS)
+menu.pack()
 ##############################Relu function (num)##############################
 def relu(x):
     return max(0, x)
@@ -191,7 +209,12 @@ neural = Neural(inputData, expected, meanSquaredError, 4)
 network = draw_network.Network(canvas, neural, 4)
 ##############################Train Neural Network to Specified Phi Target##############################
 while neural.train(neural.INC_AMOUNT) > PHI_TARGET:
-    pass
+    if((time.time()) % 1 < 0.1):
+        print(currentGate.get())
+        neural.input = GATES[currentGate.get()].input
+        neural.expected = GATES[currentGate.get()].output
+
+
 ##############################Keep window open after training algorithm completes##############################
 while True:
     window.update()
