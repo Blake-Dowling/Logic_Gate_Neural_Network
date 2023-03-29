@@ -26,6 +26,8 @@ GATES = {"NOT": Gate("NOT", [0,1], [1,0]),
          "XOR": Gate("XOR", [[0,0],[0,1],[1,0],[1,1]], [0,1,1,0]),
          "NOR": Gate("NOR", [[0,0],[0,1],[1,0],[1,1]], [1,0,0,0]),
          "XNOR": Gate("XNOR", [[0,0],[0,1],[1,0],[1,1]], [1,0,0,1])}
+
+
 ##############################Initialize Window and Main Canvas##############################
 window = Tk()
 window.resizable(False, False)
@@ -45,7 +47,7 @@ stateLabel = canvas.create_text(((WIDTH_IN_CELLS/2))*CELL_SIZE, 14*CELL_SIZE, te
 INPUT_OPTIONS = ["NOT", "AND", "OR", "NAND", "XOR", "NOR", "XNOR"]
 currentGate = StringVar(window)
 currentGate.set("AND")
-
+#currentGate.trace("w", changeGate)
 menu = OptionMenu(window, currentGate, *INPUT_OPTIONS)
 menu.pack()
 ##############################Relu function (num)##############################
@@ -99,8 +101,8 @@ def displayState(neural, output):
 class Params:
     ##############################Initialize Parameters##############################
     def __init__(self):
-        self.weights = np.array([0.0, 0.0])
-        self.biases = np.array([0.0, 0.0])
+        self.weights = np.array([0.1, 0.1])
+        self.biases = np.array([0.1, 0.1])
     ##############################Return Both Parameter Vectors as##############################
     ##############################One Vector##############################
     def paramVector(self):
@@ -210,7 +212,6 @@ network = draw_network.Network(canvas, neural, 4)
 ##############################Train Neural Network to Specified Phi Target##############################
 while neural.train(neural.INC_AMOUNT) > PHI_TARGET:
     if((time.time()) % 1 < 0.1):
-        print(currentGate.get())
         neural.input = GATES[currentGate.get()].input
         neural.expected = GATES[currentGate.get()].output
 
