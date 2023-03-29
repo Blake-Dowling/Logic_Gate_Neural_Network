@@ -11,3 +11,7 @@ Utilization may be imporoved by multithreading the feed function, which is run o
 Trials are showing tradeoff between precision and time complexity.
 
 <img width="641" alt="Screenshot 2023-03-29 at 12 14 33 AM" src="https://user-images.githubusercontent.com/121590227/228455548-9c13785f-8509-4c1c-aae7-1f8ff2ac9f31.png">
+
+
+https://user-images.githubusercontent.com/121590227/228456001-f17d56e6-1b43-4e0a-b656-46a7cc3f6c0f.mov
+
