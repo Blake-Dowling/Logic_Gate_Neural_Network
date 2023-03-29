@@ -35,34 +35,39 @@ class Layer:
         self.xLocation = xLocation 
         self.dataVector = dataVector
         self.label = label 
-    def deleteObjs(self):
-        for obj in self.objs:
-            self.canvas.delete(obj)
-        self.objs = []
-    def displayData(self):
-        self.deleteObjs()
-        createdObjs = []
-        newNodes = [] #To add to network's list
+        self.nodes = []
+        self.drawLayer()
+    def drawLayer(self):
+        #newNodes = [] #To add to network's list
         ##############################Data Label##############################
         titleObj = self.canvas.create_text((self.xLocation + 0.5) * CELL_SIZE, 
                                         (1 + 0.5) * CELL_SIZE, 
                                         text = self.label,
                                         fill = "deeppink")
-        createdObjs.append(titleObj)
         ##############################Draw Nodes##############################
         for i in range(0, len(self.dataVector)):
             node = Node(self.canvas, self.xLocation, 2 + i, str(self.dataVector[i]))
-            newNodes.append(node)
-            createdObjs.append(node.object)
-            createdObjs.append(node.label)
-        self.objs.extend(createdObjs)
+            self.nodes.append(node)
+            #createdObjs.append(node.object)
+            #createdObjs.append(node.label)
+    def deleteObjs(self):
+        for obj in self.objs:
+            self.canvas.delete(obj)
+        self.objs = []
+    def displayData(self):
+        #self.deleteObjs()
+        #createdObjs = []
+
+        #createdObjs.append(titleObj)
+
+
+        #self.objs.extend(createdObjs)
         self.canvas.update()
-        return newNodes
+        #return newNodes
 class Network:
     def __init__(self, canvas, numLayers):
         self.canvas = canvas
         self.layers = [] #Layers of neural network for displaying
-        self.nodes = []
         self.connections = []
         for i in range(numLayers):
             self.layers.append(Layer(canvas, 4*i + 2, [], "Layer " + str(i)))
@@ -70,19 +75,20 @@ class Network:
     def updateLayerData(self, layer, newData):
         self.layers[layer].dataVector = newData
     def createConnections(self):
-        for node in self.nodes:
-            for otherNode in self.nodes:
-                self.canvas.create_line(node.location[0], 
-                                        node.location[1], 
-                                        otherNode.location[0], 
-                                        otherNode.location[1],
-                                        color = "white")
-                print(node.location)
+        pass
+        # for node in self.nodes:
+        #     for otherNode in self.nodes:
+        #         self.canvas.create_line(node.location[0], 
+        #                                 node.location[1], 
+        #                                 otherNode.location[0], 
+        #                                 otherNode.location[1],
+        #                                 color = "white")
+        #         print(node.location)
     def drawNetwork(self):
         self.nodes = []
         for layer in self.layers:
-            newNodes = layer.displayData()
-            self.nodes.extend(newNodes)
+            layer.displayData()
+            nodes = layer.nodes
         
 
 
